@@ -1,6 +1,6 @@
 #import bevy_core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput
 #import bevy_render::view::View
-#import bevy_light_2d::types::{AmbientLight2d, PointLight2d, PointLightMeta};
+#import bevy_light_2d::types::{AmbientLight2d, PointLight2d, PointLightMeta, SpotLight2d, SpotLightMeta}
 #import bevy_light_2d::view_transformations::{
     frag_coord_to_ndc,
     ndc_to_world,
@@ -12,6 +12,7 @@
 // WebGL2, which is limited to 4kb in BatchedUniformBuffer, so we need to
 // ensure our point lights can fit in 4kb.
 const MAX_POINT_LIGHTS: u32 = 82u;
+const MAX_SPOT_LIGHTS:  u32 = 64u;
 
 @group(0) @binding(0)
 var<uniform> view: View;
@@ -47,7 +48,8 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     }
 
     var lighting_color = ambient_light.color.rgb;
-
+    
+    // Point lights
     for (var i = 0u; i < point_light_meta.count; i++) {
         let light = point_lights[i];
         let dist = distance(light.center, pos);
@@ -57,6 +59,22 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
 
             if raymarch > 0.0 || light.cast_shadows == 0 {
                 lighting_color += light.color.rgb * attenuation(light, dist);
+            }
+        }
+    }
+
+    // Spot lights
+    for (var i = 0u; i < spot_light_meta.count; i++) {
+        let light = spot_lights[i];
+        let effective_center = get_effective_light_center(light, pos);
+        let dist = distance(effective_center, pos);
+        if dist < light.radius {
+            let mask = spot_mask(light, pos, effective_center);
+            if mask > 0.0 {
+                let vis = raymarch(pos, effective_center);
+                if vis > 0.0 || light.cast_shadows == 0u {
+                    lighting_color += light.color.rgb * spot_attenuation(light, dist) * mask;
+                }
             }
         }
     }
@@ -116,4 +134,46 @@ fn raymarch(ray_origin: vec2<f32>, ray_target: vec2<f32>) -> f32 {
 
     // ray found occluder
     return 0.0;
+}
+
+// Spot lights: SSBO on modern backends, UBO array on WebGL2
+#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 6
+    @group(0) @binding(6)
+    var<storage> spot_lights: array<SpotLight2d>;
+#else
+    @group(0) @binding(6)
+    var<uniform> spot_lights: array<SpotLight2d, MAX_SPOT_LIGHTS>;
+#endif
+
+@group(0) @binding(7)
+var<uniform> spot_light_meta: SpotLightMeta;
+
+// Same distance falloff for spot lights; the cone is applied via spot_mask.
+fn spot_attenuation(light: SpotLight2d, dist: f32) -> f32 {
+    let s = dist / light.radius;
+    if s > 1.0 {
+         return 0.0; 
+    }
+    let s2 = square(s);
+    return light.intensity * square(1 - s2) / (1 + light.falloff * s2);
+}
+
+fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) -> f32 {
+    let to_frag = normalize(pos - effective_center);
+    let cos_theta = dot(-to_frag, normalize(light.direction));
+    let cos_inner = cos(light.inner_angle);
+    let cos_outer = cos(light.outer_angle);
+    return clamp(smoothstep(cos_outer, cos_inner, cos_theta), 0.0, 1.0);
+}
+
+fn get_effective_light_center(light: SpotLight2d, frag_pos: vec2<f32>) -> vec2<f32> {
+    if (light.source_width <= 0.0) {
+        return light.center;
+    }
+    let bar_direction = normalize(vec2<f32>(-light.direction.y, light.direction.x));
+    let to_frag = frag_pos - light.center;
+    let projection = dot(to_frag, bar_direction);
+    let half_width = light.source_width * 0.5;
+    let clamped_projection = clamp(projection, -half_width, half_width);
+    return light.center + bar_direction * clamped_projection;
 }

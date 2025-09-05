@@ -12,10 +12,10 @@ use bevy::render::view::{ViewUniformOffset, ViewUniforms};
 use smallvec::{SmallVec, smallvec};
 
 use crate::render::empty_buffer::EmptyBuffer;
-use crate::render::extract::{ExtractedAmbientLight2d, ExtractedPointLight2d};
+use crate::render::extract::{ExtractedAmbientLight2d, ExtractedPointLight2d, ExtractedSpotLight2d};
 use crate::render::sdf::SdfTexture;
 
-use super::{LightMapPipeline, LightMapTexture, PointLightMetaBuffer};
+use super::{LightMapPipeline, LightMapTexture, PointLightMetaBuffer, SpotLightMetaBuffer};
 
 const LIGHT_MAP_PASS: &str = "light_map_pass";
 const LIGHT_MAP_BIND_GROUP: &str = "light_map_bind_group";
@@ -50,6 +50,8 @@ impl ViewNode for LightMapNode {
             Some(ambient_light_uniform),
             Some(point_light_binding),
             Some(point_light_count_binding),
+            Some(spot_light_binding),
+            Some(spot_light_count_binding),
         ) = (
             pipeline_cache.get_render_pipeline(light_map_pipeline.pipeline_id),
             world.resource::<ViewUniforms>().uniforms.binding(),
@@ -62,6 +64,11 @@ impl ViewNode for LightMapNode {
                 .binding()
                 .or(world.resource::<EmptyBuffer>().binding()),
             world.resource::<PointLightMetaBuffer>().buffer.binding(),
+            world
+                .resource::<GpuArrayBuffer<ExtractedSpotLight2d>>()
+                .binding()
+                .or(world.resource::<EmptyBuffer>().binding()),
+            world.resource::<SpotLightMetaBuffer>().buffer.binding(),
         )
         else {
             return Ok(());
@@ -77,6 +84,8 @@ impl ViewNode for LightMapNode {
                 point_light_count_binding.clone(),
                 &sdf_texture.sdf.default_view,
                 &light_map_pipeline.sdf_sampler,
+                spot_light_binding.clone(),
+                spot_light_count_binding.clone(),
             )),
         );
 
@@ -90,7 +99,7 @@ impl ViewNode for LightMapNode {
             ..default()
         });
 
-        let mut light_map_offsets: SmallVec<[u32; 3]> =
+        let mut light_map_offsets: SmallVec<[u32; 4]> =
             smallvec![view_offset.offset, ambient_index.index()];
 
         // Storage buffers aren't available in WebGL2. We fall back to a
@@ -103,7 +112,8 @@ impl ViewNode for LightMapNode {
             .max_storage_buffers_per_shader_stage
             == 0
         {
-            light_map_offsets.push(0);
+            light_map_offsets.push(0); // point lights array
+            light_map_offsets.push(0); // spot lights array
         }
 
         light_map_pass.set_render_pipeline(pipeline);

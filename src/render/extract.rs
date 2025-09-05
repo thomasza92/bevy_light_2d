@@ -4,7 +4,7 @@ use bevy::{
 };
 
 use crate::{
-    light::{Light2d, PointLight2d},
+    light::{Light2d, PointLight2d, SpotLight2d},
     occluder::{LightOccluder2d, LightOccluder2dShape},
 };
 
@@ -16,6 +16,45 @@ pub struct ExtractedPointLight2d {
     pub intensity: f32,
     pub falloff: f32,
     pub cast_shadows: u32,
+}
+
+#[derive(Component, Default, Clone, ShaderType)]
+pub struct ExtractedSpotLight2d {
+    pub center: Vec2,
+    pub radius: f32,
+    pub color: LinearRgba,
+    pub intensity: f32,
+    pub falloff: f32,
+    pub direction: Vec2,
+    pub inner_angle: f32,
+    pub outer_angle: f32,
+    pub source_width: f32,
+    pub cast_shadows: u32,
+}
+
+pub fn extract_spot_lights(
+    mut commands: Commands,
+    q: Extract<Query<(&RenderEntity, &SpotLight2d, &GlobalTransform, &ViewVisibility)>>,
+) {
+    for (render_entity, s, gt, vis) in &q {
+        if !vis.get() { continue; }
+        let direction_radians = s.direction.to_radians();
+        let inner_radians = s.inner_angle.to_radians();
+        let outer_radians = s.outer_angle.to_radians();
+        let forward = Vec2::from_angle(direction_radians);
+        commands.entity(render_entity.id()).insert(ExtractedSpotLight2d {
+            center: gt.translation().xy(),
+            radius: s.radius,
+            color: s.color.to_linear(),
+            intensity: s.intensity,
+            falloff: s.falloff,
+            direction: forward,
+            inner_angle: inner_radians,
+            outer_angle: outer_radians,
+            source_width: s.source_width,
+            cast_shadows: if s.cast_shadows { 1 } else { 0 },
+        });
+    }
 }
 
 #[derive(Component, Default, Clone, ShaderType)]

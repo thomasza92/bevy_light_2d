@@ -65,6 +65,52 @@ impl Default for PointLight2d {
     }
 }
 
+/// A light that provides illumination in a beam towards a given direction.
+///
+/// This is commonly used as a component within [`PointLight2dBundle`].
+#[derive(Component, Clone, Reflect)]
+#[reflect(Component, Default)]
+#[require(SyncToRenderWorld, Transform, Visibility, VisibilityClass)]
+#[component(on_add = view::add_visibility_class::<SpotLight2d>)]
+pub struct SpotLight2d {
+    /// The light's color tint.
+    pub color: Color,
+    /// The intensity of the light. The light's attenutation is multiplied by this value.
+    /// The higher the intensity, the brighter the light.
+    pub intensity: f32,
+    /// The radius of the light. Illumination will only occur within the light's radius.
+    pub radius: f32,
+    /// How quickly illumination from the light should deteriorate over distance.
+    /// A higher falloff value will result in less illumination at the light's maximum radius.
+    pub falloff: f32,
+    /// The given angle direction (in degrees) of the light.
+    pub direction: f32,
+    /// The inner angle of the light.
+    pub inner_angle: f32,
+    /// The outer angle of the light.
+    pub outer_angle: f32,
+    /// The width of the segment from where the light begins to emit.
+    pub source_width: f32,
+    /// Whether the light should cast shadows.
+    pub cast_shadows: bool,
+}
+
+impl Default for SpotLight2d {
+    fn default() -> Self {
+        Self {
+            color: Color::WHITE,
+            intensity: 2.0,
+            radius: 160.,
+            falloff: 2.5,
+            direction: -90.,
+            inner_angle: -180.,
+            outer_angle: -90.,
+            source_width: 1.,
+            cast_shadows: false,
+        }
+    }
+}
+
 /// A bundle of components for rendering a [`PointLight2d`] entity.
 #[derive(Bundle, Default)]
 #[deprecated(

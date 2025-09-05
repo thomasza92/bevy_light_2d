@@ -11,9 +11,13 @@ use bevy::{
     },
 };
 
-use crate::render::extract::ExtractedPointLight2d;
+use crate::render::extract::{ExtractedPointLight2d, ExtractedSpotLight2d};
 
-use super::{LightMapTexture, PointLightMeta, PointLightMetaBuffer};
+use super::{
+    LightMapTexture,
+    PointLightMeta, PointLightMetaBuffer,
+    SpotLightMeta, SpotLightMetaBuffer,
+};
 
 const LIGHT_MAP_TEXTURE: &str = "light_map_texture";
 
@@ -53,6 +57,19 @@ pub fn prepare_point_light_count(
     let meta = PointLightMeta::new(point_lights.iter().len() as u32);
     point_light_count.buffer.set(meta);
     point_light_count
+        .buffer
+        .write_buffer(&render_device, &render_queue);
+}
+
+pub fn prepare_spot_light_count(
+    render_device: Res<RenderDevice>,
+    render_queue: Res<RenderQueue>,
+    spot_lights: Query<&ExtractedSpotLight2d>,
+    mut spot_light_count: ResMut<SpotLightMetaBuffer>,
+) {
+    let meta = SpotLightMeta::new(spot_lights.iter().len() as u32);
+    spot_light_count.buffer.set(meta);
+    spot_light_count
         .buffer
         .write_buffer(&render_device, &render_queue);
 }

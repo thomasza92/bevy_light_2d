@@ -15,7 +15,7 @@ use bevy::{
 
 pub use node::LightMapNode;
 pub use pipeline::LightMapPipeline;
-pub use prepare::{prepare_light_map_texture, prepare_point_light_count};
+pub use prepare::{prepare_light_map_texture, prepare_point_light_count, prepare_spot_light_count};
 
 pub const LIGHT_MAP_SHADER: Handle<Shader> = weak_handle!("48777bb3-8a37-4b4d-a4f2-f10ff1ee4360");
 
@@ -40,6 +40,27 @@ pub struct PointLightMeta {
 }
 
 impl PointLightMeta {
+    pub fn new(count: u32) -> Self {
+        Self {
+            count,
+            _padding: Vec3::ZERO,
+        }
+    }
+}
+
+#[derive(Resource, Default)]
+pub struct SpotLightMetaBuffer {
+    pub buffer: UniformBuffer<SpotLightMeta>,
+}
+
+#[derive(Default, ShaderType)]
+pub struct SpotLightMeta {
+    pub count: u32,
+    // WebGL2 structs must be 16 byte aligned.
+    _padding: Vec3,
+}
+
+impl SpotLightMeta {
     pub fn new(count: u32) -> Self {
         Self {
             count,

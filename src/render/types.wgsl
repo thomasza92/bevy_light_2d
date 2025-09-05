@@ -18,6 +18,19 @@ struct PointLight2d {
     cast_shadows: u32
 }
 
+struct SpotLight2d {
+    center: vec2f,
+    radius: f32,
+    color: vec4<f32>,
+    intensity: f32,
+    falloff: f32,
+    direction: vec2f,
+    inner_angle: f32,
+    outer_angle: f32,
+    source_width: f32,
+    cast_shadows: u32,
+}
+
 struct PointLightMeta {
     count: u32,
     // WebGL2 structs must be 16 byte aligned.
@@ -28,4 +41,10 @@ struct OccluderMeta {
     count: u32,
     // WebGL2 structs must be 16 byte aligned.
     _padding: vec3<u32>
+}
+
+struct SpotLightMeta {
+    count: u32,
+    // WebGL2 structs must be 16 byte aligned.
+    _padding: vec3<u32>,
 }

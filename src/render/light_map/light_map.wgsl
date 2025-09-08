@@ -39,6 +39,18 @@ var sdf: texture_2d<f32>;
 @group(0) @binding(5)
 var sdf_sampler: sampler;
 
+// Spot lights: SSBO on modern backends, UBO array on WebGL2
+#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 6
+    @group(0) @binding(6)
+    var<storage> spot_lights: array<SpotLight2d>;
+#else
+    @group(0) @binding(6)
+    var<uniform> spot_lights: array<SpotLight2d, MAX_SPOT_LIGHTS>;
+#endif
+
+@group(0) @binding(7)
+var<uniform> spot_light_meta: SpotLightMeta;
+
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let pos = ndc_to_world(frag_coord_to_ndc(in.position.xy));
@@ -58,7 +70,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
             let raymarch = raymarch(pos, light.center);
 
             if raymarch > 0.0 || light.cast_shadows == 0 {
-                lighting_color += light.color.rgb * attenuation(light, dist);
+                lighting_color += light.color.rgb * attenuation(dist, light.radius, light.intensity, light.falloff);
             }
         }
     }
@@ -73,7 +85,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
             if mask > 0.0 {
                 let vis = raymarch(pos, effective_center);
                 if vis > 0.0 || light.cast_shadows == 0u {
-                    lighting_color += light.color.rgb * spot_attenuation(light, dist) * mask;
+                    lighting_color += light.color.rgb * attenuation(dist, light.radius, light.intensity, light.falloff) * mask;
                 }
             }
         }
@@ -88,13 +100,13 @@ fn square(x: f32) -> f32 {
 
 // Compute light attenutation.
 // See https://lisyarus.github.io/blog/posts/point-light-attenuation.html
-fn attenuation(light: PointLight2d, dist: f32) -> f32 {
-    let s = dist / light.radius;
+fn attenuation(dist: f32, radius: f32, intensity: f32, falloff: f32) -> f32 {
+    let s = dist / radius;
     if s > 1.0 {
         return 0.0;
     }
     let s2 = square(s);
-    return light.intensity * square(1 - s2) / (1 + light.falloff * s2);
+    return intensity * square(1.0 - s2) / (1.0 + falloff * s2);
 }
 
 fn get_distance(pos: vec2<f32>) -> f32 {
@@ -134,28 +146,6 @@ fn raymarch(ray_origin: vec2<f32>, ray_target: vec2<f32>) -> f32 {
 
     // ray found occluder
     return 0.0;
-}
-
-// Spot lights: SSBO on modern backends, UBO array on WebGL2
-#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 6
-    @group(0) @binding(6)
-    var<storage> spot_lights: array<SpotLight2d>;
-#else
-    @group(0) @binding(6)
-    var<uniform> spot_lights: array<SpotLight2d, MAX_SPOT_LIGHTS>;
-#endif
-
-@group(0) @binding(7)
-var<uniform> spot_light_meta: SpotLightMeta;
-
-// Same distance falloff for spot lights; the cone is applied via spot_mask.
-fn spot_attenuation(light: SpotLight2d, dist: f32) -> f32 {
-    let s = dist / light.radius;
-    if s > 1.0 {
-         return 0.0; 
-    }
-    let s2 = square(s);
-    return light.intensity * square(1 - s2) / (1 + light.falloff * s2);
 }
 
 fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) -> f32 {

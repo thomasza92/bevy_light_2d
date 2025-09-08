@@ -67,7 +67,6 @@ impl Default for PointLight2d {
 
 /// A light that provides illumination in a beam towards a given direction.
 ///
-/// This is commonly used as a component within [`PointLight2dBundle`].
 #[derive(Component, Clone, Reflect)]
 #[reflect(Component, Default)]
 #[require(SyncToRenderWorld, Transform, Visibility, VisibilityClass)]

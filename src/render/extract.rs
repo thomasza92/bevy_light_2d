@@ -36,23 +36,23 @@ pub fn extract_spot_lights(
     mut commands: Commands,
     q: Extract<Query<(&RenderEntity, &SpotLight2d, &GlobalTransform, &ViewVisibility)>>,
 ) {
-    for (render_entity, s, gt, vis) in &q {
-        if !vis.get() { continue; }
-        let direction_radians = s.direction.to_radians();
-        let inner_radians = s.inner_angle.to_radians();
-        let outer_radians = s.outer_angle.to_radians();
-        let forward = Vec2::from_angle(direction_radians);
+    for (render_entity, spot_light, global_transform, view_visibility) in &q {
+        if !view_visibility.get() { continue; }
+        let direction_radians = spot_light.direction.to_radians();
+        let inner_radians = spot_light.inner_angle.to_radians();
+        let outer_radians = spot_light.outer_angle.to_radians();
+        let spotlight_direction = Vec2::from_angle(direction_radians);
         commands.entity(render_entity.id()).insert(ExtractedSpotLight2d {
-            center: gt.translation().xy(),
-            radius: s.radius,
-            color: s.color.to_linear(),
-            intensity: s.intensity,
-            falloff: s.falloff,
-            direction: forward,
+            center: global_transform.translation().xy(),
+            radius: spot_light.radius,
+            color: spot_light.color.to_linear(),
+            intensity: spot_light.intensity,
+            falloff: spot_light.falloff,
+            direction: spotlight_direction,
             inner_angle: inner_radians,
             outer_angle: outer_radians,
-            source_width: s.source_width,
-            cast_shadows: if s.cast_shadows { 1 } else { 0 },
+            source_width: spot_light.source_width,
+            cast_shadows: if spot_light.cast_shadows { 1 } else { 0 },
         });
     }
 }

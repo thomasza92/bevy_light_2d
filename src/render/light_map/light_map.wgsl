@@ -148,6 +148,13 @@ fn raymarch(ray_origin: vec2<f32>, ray_target: vec2<f32>) -> f32 {
     return 0.0;
 }
 
+// Calculates the mask for a given spotlight. 
+// The direction, inner_angle, and outer_angle can be modulated to control the lit area of the spotlight.
+// to_frag: the vector from the origin `effective_center` to the fragment position `pos`.
+// cos_theta: the cosine of the angle between the origin and the vector of the fragment position.
+// cos_inner: the cosine of the given inner angle
+// cos_outer: the cosine of the given outer angle
+// Returns: a 0..1 value representing the intensity of a spotlight at a given position
 fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) -> f32 {
     let to_frag = normalize(pos - effective_center);
     let cos_theta = dot(-to_frag, normalize(light.direction));
@@ -156,6 +163,13 @@ fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) ->
     return clamp(smoothstep(cos_outer, cos_inner, cos_theta), 0.0, 1.0);
 }
 
+// Calculates the effective center for a light from a given source_width.
+// If the source_width is 0, this will simply return the center position.
+// bar_direction: the direction of the light bar, which is perpendicular to the direction of the light.
+// to_frag: the vector from the effective center of the light to the fragment position `frag_pos`.
+// projection: the projection of the fragment position onto the line defined by the light bar.
+// clamped_projection: the projection value clamped within the bounds of the actual width of the light bar.
+// Returns: a vec2<f32> representing the closest point of the light source to the fragment.
 fn get_effective_light_center(light: SpotLight2d, frag_pos: vec2<f32>) -> vec2<f32> {
     if (light.source_width <= 0.0) {
         return light.center;

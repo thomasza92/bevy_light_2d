@@ -1,5 +1,5 @@
 use bevy::{
-    color::palettes::css::{BLUE, YELLOW},
+    color::palettes::css::{BLUE, YELLOW, GREEN, RED},
     input::mouse::MouseWheel,
     prelude::*,
 };
@@ -22,13 +22,19 @@ struct YellowLight;
 #[derive(Component)]
 struct BlueLight;
 
+#[derive(Component)]
+struct RedLight;
+
+#[derive(Component)]
+struct GreenLight;
+
 fn setup(mut commands: Commands) {
     commands.spawn((Camera2d, Light2d::default()));
 
     commands.spawn((
         PointLight2d {
             intensity: 20.0,
-            radius: 1000.0,
+            radius: 500.0,
             falloff: 10.0,
             cast_shadows: true,
             color: Color::Srgba(YELLOW),
@@ -40,13 +46,45 @@ fn setup(mut commands: Commands) {
     commands.spawn((
         PointLight2d {
             intensity: 20.0,
-            radius: 1000.0,
+            radius: 500.0,
             falloff: 10.0,
             cast_shadows: true,
             color: Color::Srgba(BLUE),
         },
-        Transform::from_translation(Vec3::new(0.0, -200.0, 0.0)),
+        Transform::from_translation(Vec3::new(0.0, 200.0, 0.0)),
         BlueLight,
+    ));
+
+        commands.spawn((
+        SpotLight2d {
+            intensity: 20.0,
+            radius: 500.0,
+            falloff: 10.0,
+            direction: 90.0,
+            inner_angle: 180.0,
+            outer_angle: 120.0,
+            source_width: 10.0,
+            cast_shadows: true,
+            color: Color::Srgba(RED),
+        },
+        Transform::from_translation(Vec3::new(0.0, -200.0, 0.0)),
+        RedLight,
+    ));
+
+        commands.spawn((
+        SpotLight2d {
+            intensity: 20.0,
+            radius: 500.0,
+            falloff: 10.0,
+            direction: 90.0,
+            inner_angle: 180.0,
+            outer_angle: 120.0,
+            source_width: 10.0,
+            cast_shadows: true,
+            color: Color::Srgba(GREEN),
+        },
+        Transform::from_translation(Vec3::new(0.0, -200.0, 0.0)),
+        GreenLight,
     ));
 
     commands.spawn((
@@ -96,8 +134,10 @@ fn setup(mut commands: Commands) {
 }
 
 fn move_lights(
-    mut yellow_query: Query<&mut Transform, (With<YellowLight>, Without<BlueLight>)>,
-    mut blue_query: Query<&mut Transform, (With<BlueLight>, Without<YellowLight>)>,
+    mut yellow_query: Query<&mut Transform, (With<YellowLight>, Without<BlueLight>, Without<RedLight>,Without<GreenLight>)>,
+    mut blue_query: Query<&mut Transform, (With<BlueLight>, Without<YellowLight>, Without<RedLight>, Without<GreenLight>)>,
+    mut red_query: Query<&mut Transform, (With<RedLight>, Without<GreenLight>, Without<BlueLight>, Without<YellowLight>)>,
+    mut green_query: Query<&mut Transform, (With<GreenLight>, Without<RedLight>, Without<BlueLight>, Without<YellowLight>)>,
     time: Res<Time>,
 ) {
     for mut light_transform in &mut yellow_query {
@@ -105,6 +145,12 @@ fn move_lights(
     }
     for mut light_transform in &mut blue_query {
         light_transform.translation.x = time.elapsed_secs().cos() * 500.
+    }
+    for mut light_transform in &mut red_query {
+        light_transform.translation.x = time.elapsed_secs().cos() * 300.
+    }
+    for mut light_transform in &mut green_query {
+        light_transform.translation.x = time.elapsed_secs().cos() * 750.
     }
 }
 

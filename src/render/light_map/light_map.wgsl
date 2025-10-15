@@ -165,19 +165,24 @@ fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) ->
 
 // Calculates the effective center for a light from a given source_width.
 // If the source_width is 0, this will simply return the center position.
-// bar_direction: the direction of the light bar, which is perpendicular to the direction of the light.
-// to_frag: the vector from the effective center of the light to the fragment position `frag_pos`.
-// projection: the projection of the fragment position onto the line defined by the light bar.
-// clamped_projection: the projection value clamped within the bounds of the actual width of the light bar.
 // Returns: a vec2<f32> representing the closest point of the light source to the fragment.
 fn get_effective_light_center(light: SpotLight2d, frag_pos: vec2<f32>) -> vec2<f32> {
     if (light.source_width <= 0.0) {
         return light.center;
     }
+    
+    // Compute the direction of the light bar, which is perpendicular to the direction of the light
     let bar_direction = normalize(vec2<f32>(-light.direction.y, light.direction.x));
+    
+    // Compute the vector from the effective center of the light to the fragment position
     let to_frag = frag_pos - light.center;
+    
+    // Compute the projection of the fragment position onto the line defined by the light bar
     let projection = dot(to_frag, bar_direction);
+    
+    // Clamp the projection within the bounds of the actual width of the light bar
     let half_width = light.source_width * 0.5;
     let clamped_projection = clamp(projection, -half_width, half_width);
+    
     return light.center + bar_direction * clamped_projection;
 }

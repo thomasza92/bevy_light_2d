@@ -150,10 +150,6 @@ fn raymarch(ray_origin: vec2<f32>, ray_target: vec2<f32>) -> f32 {
 
 // Calculates the mask for a given spotlight. 
 // The direction, inner_angle, and outer_angle can be modulated to control the lit area of the spotlight.
-// to_frag: the vector from the origin `effective_center` to the fragment position `pos`.
-// cos_theta: the cosine of the angle between the origin and the vector of the fragment position.
-// cos_inner: the cosine of the given inner angle
-// cos_outer: the cosine of the given outer angle
 // Returns: a 0..1 value representing the intensity of a spotlight at a given position
 fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) -> f32 {
     let to_frag = normalize(pos - effective_center);

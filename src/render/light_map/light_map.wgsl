@@ -78,7 +78,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     // Spot lights
     for (var i = 0u; i < spot_light_meta.count; i++) {
         let light = spot_lights[i];
-        let effective_center = get_effective_light_center(light, pos);
+        let effective_center = get_effective_spot_light_center(light, pos);
         let dist = distance(effective_center, pos);
         if dist < light.radius {
             let mask = spot_mask(light, pos, effective_center);
@@ -170,7 +170,7 @@ fn spot_mask(light: SpotLight2d, pos: vec2<f32>, effective_center: vec2<f32>) ->
 // projection: the projection of the fragment position onto the line defined by the light bar.
 // clamped_projection: the projection value clamped within the bounds of the actual width of the light bar.
 // Returns: a vec2<f32> representing the closest point of the light source to the fragment.
-fn get_effective_light_center(light: SpotLight2d, frag_pos: vec2<f32>) -> vec2<f32> {
+fn get_effective_spot_light_center(light: SpotLight2d, frag_pos: vec2<f32>) -> vec2<f32> {
     if (light.source_width <= 0.0) {
         return light.center;
     }

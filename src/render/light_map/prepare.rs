@@ -14,9 +14,7 @@ use bevy::{
 use crate::render::extract::{ExtractedPointLight2d, ExtractedSpotLight2d};
 
 use super::{
-    LightMapTexture,
-    PointLightMeta, PointLightMetaBuffer,
-    SpotLightMeta, SpotLightMetaBuffer,
+    LightMapTexture, PointLightMeta, PointLightMetaBuffer, SpotLightMeta, SpotLightMetaBuffer,
 };
 
 const LIGHT_MAP_TEXTURE: &str = "light_map_texture";

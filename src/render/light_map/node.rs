@@ -12,7 +12,9 @@ use bevy::render::view::{ViewUniformOffset, ViewUniforms};
 use smallvec::{SmallVec, smallvec};
 
 use crate::render::empty_buffer::EmptyBuffer;
-use crate::render::extract::{ExtractedAmbientLight2d, ExtractedPointLight2d, ExtractedSpotLight2d};
+use crate::render::extract::{
+    ExtractedAmbientLight2d, ExtractedPointLight2d, ExtractedSpotLight2d,
+};
 use crate::render::sdf::SdfTexture;
 
 use super::{LightMapPipeline, LightMapTexture, PointLightMetaBuffer, SpotLightMetaBuffer};

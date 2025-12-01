@@ -18,12 +18,14 @@ use crate::{
         TYPES_SHADER, VIEW_TRANSFORMATIONS_SHADER,
         empty_buffer::{EmptyBuffer, prepare_empty_buffer},
         extract::{
-            ExtractedAmbientLight2d, ExtractedLightOccluder2d, ExtractedPointLight2d, ExtractedSpotLight2d,
-            extract_ambient_lights, extract_light_occluders, extract_point_lights, extract_spot_lights,
+            ExtractedAmbientLight2d, ExtractedLightOccluder2d, ExtractedPointLight2d,
+            ExtractedSpotLight2d, extract_ambient_lights, extract_light_occluders,
+            extract_point_lights, extract_spot_lights,
         },
         light_map::{
-            LIGHT_MAP_SHADER, LightMapNode, LightMapPass, LightMapPipeline, PointLightMetaBuffer, SpotLightMetaBuffer,
-            prepare_light_map_texture, prepare_point_light_count, prepare_spot_light_count,
+            LIGHT_MAP_SHADER, LightMapNode, LightMapPass, LightMapPipeline, PointLightMetaBuffer,
+            SpotLightMetaBuffer, prepare_light_map_texture, prepare_point_light_count,
+            prepare_spot_light_count,
         },
         lighting::{
             LIGHTING_SHADER, LightingNode, LightingPass, LightingPipeline,

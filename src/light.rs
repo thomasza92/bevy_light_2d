@@ -65,16 +65,16 @@ impl Default for PointLight2d {
 }
 
 /// A light that provides illumination in a beam towards a given direction.
-/// 
+///
 /// The parameters for spot lights function identically to point lights, but with a few additional parameters included.
 /// The direction parameter defines the angle (in degrees) that the light is pointing towards.
 /// The inner and outer angle parameters of the light are used to define the tapering of the light's beam.
 /// The source width parameter defines the width of the segment from where the light begins to emit.
-/// 
+///
 #[derive(Component, Clone, Reflect)]
 #[reflect(Component, Default)]
 #[require(SyncToRenderWorld, Transform, Visibility, VisibilityClass)]
-#[component(on_add = view::add_visibility_class::<SpotLight2d>)]
+#[component(on_add = visibility::add_visibility_class::<SpotLight2d>)]
 pub struct SpotLight2d {
     /// The light's color tint.
     pub color: Color,

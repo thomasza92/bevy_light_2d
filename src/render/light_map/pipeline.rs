@@ -11,7 +11,9 @@ use bevy::render::render_resource::{
 use bevy::render::renderer::RenderDevice;
 use bevy::render::view::ViewUniform;
 
-use crate::render::extract::{ExtractedAmbientLight2d, ExtractedPointLight2d, ExtractedSpotLight2d};
+use crate::render::extract::{
+    ExtractedAmbientLight2d, ExtractedPointLight2d, ExtractedSpotLight2d,
+};
 
 use super::{LIGHT_MAP_SHADER, PointLightMeta, SpotLightMeta};
 

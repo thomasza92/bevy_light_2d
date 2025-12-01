@@ -1,5 +1,5 @@
 use bevy::{
-    color::palettes::css::{BLUE, YELLOW, GREEN, RED},
+    color::palettes::css::{BLUE, GREEN, RED, YELLOW},
     input::mouse::MouseWheel,
     prelude::*,
 };
@@ -55,7 +55,7 @@ fn setup(mut commands: Commands) {
         BlueLight,
     ));
 
-        commands.spawn((
+    commands.spawn((
         SpotLight2d {
             intensity: 20.0,
             radius: 500.0,
@@ -71,7 +71,7 @@ fn setup(mut commands: Commands) {
         RedLight,
     ));
 
-        commands.spawn((
+    commands.spawn((
         SpotLight2d {
             intensity: 20.0,
             radius: 500.0,
@@ -134,10 +134,42 @@ fn setup(mut commands: Commands) {
 }
 
 fn move_lights(
-    mut yellow_query: Query<&mut Transform, (With<YellowLight>, Without<BlueLight>, Without<RedLight>,Without<GreenLight>)>,
-    mut blue_query: Query<&mut Transform, (With<BlueLight>, Without<YellowLight>, Without<RedLight>, Without<GreenLight>)>,
-    mut red_query: Query<&mut Transform, (With<RedLight>, Without<GreenLight>, Without<BlueLight>, Without<YellowLight>)>,
-    mut green_query: Query<&mut Transform, (With<GreenLight>, Without<RedLight>, Without<BlueLight>, Without<YellowLight>)>,
+    mut yellow_query: Query<
+        &mut Transform,
+        (
+            With<YellowLight>,
+            Without<BlueLight>,
+            Without<RedLight>,
+            Without<GreenLight>,
+        ),
+    >,
+    mut blue_query: Query<
+        &mut Transform,
+        (
+            With<BlueLight>,
+            Without<YellowLight>,
+            Without<RedLight>,
+            Without<GreenLight>,
+        ),
+    >,
+    mut red_query: Query<
+        &mut Transform,
+        (
+            With<RedLight>,
+            Without<GreenLight>,
+            Without<BlueLight>,
+            Without<YellowLight>,
+        ),
+    >,
+    mut green_query: Query<
+        &mut Transform,
+        (
+            With<GreenLight>,
+            Without<RedLight>,
+            Without<BlueLight>,
+            Without<YellowLight>,
+        ),
+    >,
     time: Res<Time>,
 ) {
     for mut light_transform in &mut yellow_query {

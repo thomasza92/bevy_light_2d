@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adjusted the occlusion example to include spotlights.
 
+## [0.8.0] - 2025-10-14
+
+### Changed
+
+- Updated Bevy version from `0.16` to `0.17` (#57).
+
 ## [0.7.0] - 2025-07-16
 
 ### Added

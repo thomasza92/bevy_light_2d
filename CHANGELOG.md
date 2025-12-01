@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a `SpotLight2D` component which can be used to create spotlights.
+- Added a `SpotLight2D` component which can be used to create spotlights (#52).
 
 ### Changed
 
